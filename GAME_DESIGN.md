@@ -9,37 +9,32 @@ A mobile-first creature raising game inspired by Digimon World Championship, fea
 
 ---
 
-## Theme Options to Explore
+## Theme: Bio-Mechanical Creatures ⚙️🔧
 
-### Option 1: Mythical Creatures
-- **Concept**: Creatures from various mythologies (dragons, phoenixes, kitsune, griffins)
-- **Pros**: Rich existing lore, wide variety, familiar yet magical
-- **Cons**: May feel scattered without cohesive worldbuilding
-- **Evolution examples**: Hatchling → Whelp → Drake → Dragon/Wyrm/Wyvern
+**Chosen Direction**: Mix of organic and mechanical parts - wind-up toys meets living creatures
 
-### Option 2: Elemental Beings
-- **Concept**: Creatures embodying natural elements (fire, water, earth, air, lightning, ice, etc.)
-- **Pros**: Clear visual identity, easy to balance, natural type advantages
-- **Cons**: Might feel generic
-- **Evolution examples**: Spark → Bolt Beast → Thunder Titan / Storm Serpent
+### Why This Works
+- Perfect fit for board game aesthetic (toy-like quality)
+- Unique visual identity that stands out
+- Mix mechanical elements with elemental powers (steam-powered, hydro-mechanical, etc.)
+- Cohesive world: "Clockwork Menagerie" or "Gear Garden"
 
-### Option 3: Bio-Mechanical Creatures
-- **Concept**: Mix of organic and mechanical parts (think wind-up toys meets living creatures)
-- **Pros**: Fits board game aesthetic perfectly, unique visual style
-- **Cons**: Narrower appeal
-- **Evolution examples**: Cog Critter → Gear Beast → Clock Dragon
+### Creature Types
+Bio-mechanical creatures powered by different energy sources:
+- **Clockwork** (wind-up, gears, springs)
+- **Steam-Powered** (fire/heat element)
+- **Hydro-Mechanical** (water-powered)
+- **Electric** (battery/tesla coil powered)
+- **Pneumatic** (air-powered)
+- **Kinetic** (motion-powered, flywheel)
 
-### Option 4: Pocket Ecosystems
-- **Concept**: Creatures that represent whole ecosystems (forest, desert, ocean, sky)
-- **Pros**: Educational angle, unique concept, visual variety
-- **Cons**: Harder to make cohesive
-- **Evolution examples**: Seedling → Grove Guardian → Ancient Forest Spirit
-
-### Option 5: Emotions/Concepts
-- **Concept**: Abstract creatures representing feelings or ideas
-- **Pros**: Unique, philosophical, broad design freedom
-- **Cons**: Harder to make visually distinct, may be too abstract
-- **Evolution examples**: Joy Spark → Laughter Spirit → Euphoria Entity
+### Evolution Philosophy
+- Creatures gain more complex mechanisms as they evolve
+- Baby forms: Simple toys (single gear, basic spring)
+- Teen forms: Multiple moving parts
+- Adult forms: Intricate clockwork systems
+- **Merging branches**: Different paths can converge to similar forms with stat/color variants
+- **Variant system**: Same creature model, different paint jobs and stat distributions
 
 ---
 
@@ -63,11 +58,18 @@ A mobile-first creature raising game inspired by Digimon World Championship, fea
    - Rare/special evolutions with specific conditions
 
 ### Evolution Stages
-- **Stage 1**: Baby (0-3 days)
-- **Stage 2**: Child (3-7 days) - First branching
-- **Stage 3**: Teen (7-14 days) - Major branching
-- **Stage 4**: Adult (14+ days) - Final forms
+- **Stage 1**: Baby (0-3 days) - Simple mechanisms
+- **Stage 2**: Child (3-7 days) - First branching (2-3 paths)
+- **Stage 3**: Teen (7-14 days) - Major branching (some paths merge here)
+- **Stage 4**: Adult (14+ days) - Final forms (variants possible)
 - **Stage 5**: ??? Special/Ultimate forms (rare conditions)
+
+### Merging Evolution Paths
+Some evolution branches **converge** to create variants:
+- Same base form, different colors/materials
+- Stat distribution varies (Speed vs Strength variant)
+- Special moves/abilities differ
+- Example: Training for Speed or Strength might give you "Raptor Mk.II" but one is chrome (speed) and one is bronze (strength)
 
 ---
 
@@ -162,14 +164,21 @@ A mobile-first creature raising game inspired by Digimon World Championship, fea
 
 ---
 
-## Questions to Answer
+## Design Decisions ✓
 
-1. **What theme resonates most with you?** (Or should we combine elements?)
-2. **How complex should the evolution system be?** (10 creatures vs. 50 vs. 150+?)
-3. **Primary focus**: Single creature care vs. collecting many?
-4. **Competitive or casual?** How important are battles/competitions?
-5. **Story/narrative**: Is there a world/plot, or pure gameplay focus?
-6. **Multiplayer depth**: Async only, or real-time features?
+1. **Theme**: Bio-mechanical creatures ✓
+2. **Scope**: Ambitious - 50+ creatures with merging evolution paths ✓
+3. **Active creatures**: 5-6 at once (limit on active roster) ✓
+4. **Battle focus**: Side activity, not core loop ✓
+5. **Tech stack**: JavaScript or Godot (web export for phone testing) ✓
+6. **Development workflow**: Phone-first - test quickly via web builds ✓
+
+## Questions Still to Answer
+
+1. **Story/narrative**: Is there a world/plot, or pure gameplay focus?
+2. **Multiplayer depth**: Async only, or real-time features?
+3. **Color palette**: Warm/inviting, rich/saturated, or muted/earthy?
+4. **Starting creatures**: How many options at game start?
 
 ---
 
