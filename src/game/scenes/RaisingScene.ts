@@ -186,7 +186,7 @@ export class RaisingScene extends Phaser.Scene {
     const button = this.add.rectangle(x, y, width, height, color)
       .setInteractive({ useHandCursor: true });
 
-    const buttonText = this.add.text(x, y, text, {
+    this.add.text(x, y, text, {
       fontSize: '24px',
       color: '#FFFFFF',
       fontFamily: 'Arial, sans-serif',

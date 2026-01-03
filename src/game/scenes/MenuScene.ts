@@ -12,7 +12,7 @@ export class MenuScene extends Phaser.Scene {
     // Background color already set in config
 
     // Title
-    const title = this.add.text(centerX, centerY - 300, '⚙️ CLOCKWORK MENAGERIE ⚙️', {
+    this.add.text(centerX, centerY - 300, '⚙️ CLOCKWORK MENAGERIE ⚙️', {
       fontSize: '42px',
       color: '#8B4513',
       fontFamily: 'Arial, sans-serif',
@@ -43,7 +43,7 @@ export class MenuScene extends Phaser.Scene {
     ).setInteractive({ useHandCursor: true });
 
     // Start button text
-    const startButtonText = this.add.text(centerX, buttonY, 'START GAME', {
+    this.add.text(centerX, buttonY, 'START GAME', {
       fontSize: '32px',
       color: '#FFFFFF',
       fontFamily: 'Arial, sans-serif',
