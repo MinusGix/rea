@@ -286,6 +286,8 @@ export class RaisingScene extends Phaser.Scene {
       color: `#${color.toString(16).padStart(6, '0')}`,
       fontFamily: 'Arial, sans-serif',
       fontStyle: 'bold',
+      stroke: '#000000',
+      strokeThickness: 4,
     }).setOrigin(0.5);
 
     this.tweens.add({
