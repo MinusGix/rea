@@ -77,32 +77,61 @@ export class RaisingScene extends Phaser.Scene {
     const accentColor = this.currentCreature?.accentColor || 0xD2691E;
 
     // Plastic stand (translucent)
-    const stand = this.add.ellipse(0, 100, 120, 30, accentColor, 0.4);
+    const stand = this.add.ellipse(0, 120, 140, 35, accentColor, 0.4);
     stand.setStrokeStyle(2, accentColor, 0.6);
 
-    // Creature body (use creature's color)
-    this.creatureBody = this.add.circle(0, 0, 60, bodyColor);
-    this.creatureBody.setStrokeStyle(3, accentColor);
+    // Check if sprite is loaded
+    const creatureId = this.currentCreature?.id;
+    const hasSprite = creatureId && this.textures.exists(creatureId);
 
-    // Wind-up key on back
-    const key = this.add.rectangle(50, 0, 12, 40, accentColor);
-    const keyHandle = this.add.circle(50, -25, 8, accentColor);
+    if (hasSprite && creatureId) {
+      // Use sprite image
+      const sprite = this.add.image(0, 0, creatureId);
+      sprite.setScale(0.25); // Scale down from 2048x2048 to ~512px
+      sprite.setInteractive({ useHandCursor: true });
+      sprite.on('pointerdown', () => {
+        this.petCreature();
+      });
 
-    // Simple spring
-    const spring = this.add.rectangle(0, 30, 20, 40, accentColor);
+      this.creature.add([stand, sprite]);
 
-    // Eyes
-    const leftEye = this.add.circle(-20, -10, 8, 0x000000);
-    const rightEye = this.add.circle(20, -10, 8, 0x000000);
+      // Store reference for scaling animations
+      this.creatureBody = sprite as unknown as Phaser.GameObjects.Arc;
 
-    // Highlight dots (to show it's mechanical)
-    const highlight1 = this.add.circle(-18, -12, 3, 0xFFFFFF);
-    const highlight2 = this.add.circle(22, -12, 3, 0xFFFFFF);
+      console.log(`🎨 Rendered sprite for ${creatureId}`);
+    } else {
+      // Fallback to placeholder shapes
+      this.creatureBody = this.add.circle(0, 0, 60, bodyColor);
+      this.creatureBody.setStrokeStyle(3, accentColor);
 
-    // Add all to container
-    this.creature.add([stand, this.creatureBody, spring, key, keyHandle, leftEye, rightEye, highlight1, highlight2]);
+      const key = this.add.rectangle(50, 0, 12, 40, accentColor);
+      const keyHandle = this.add.circle(50, -25, 8, accentColor);
+      const spring = this.add.rectangle(0, 30, 20, 40, accentColor);
+      const leftEye = this.add.circle(-20, -10, 8, 0x000000);
+      const rightEye = this.add.circle(20, -10, 8, 0x000000);
+      const highlight1 = this.add.circle(-18, -12, 3, 0xFFFFFF);
+      const highlight2 = this.add.circle(22, -12, 3, 0xFFFFFF);
 
-    // Add idle animation (gentle bounce)
+      this.creature.add([stand, this.creatureBody, spring, key, keyHandle, leftEye, rightEye, highlight1, highlight2]);
+
+      // Rotate key slowly (only for placeholder)
+      this.tweens.add({
+        targets: [key, keyHandle],
+        angle: -360,
+        duration: 4000,
+        repeat: -1,
+        ease: 'Linear',
+      });
+
+      this.creatureBody.setInteractive({ useHandCursor: true });
+      this.creatureBody.on('pointerdown', () => {
+        this.petCreature();
+      });
+
+      console.log(`⚠️ No sprite found, using placeholder`);
+    }
+
+    // Add idle animation (gentle bounce) for whole container
     this.tweens.add({
       targets: this.creature,
       y: y - 10,
@@ -110,21 +139,6 @@ export class RaisingScene extends Phaser.Scene {
       yoyo: true,
       repeat: -1,
       ease: 'Sine.easeInOut',
-    });
-
-    // Rotate key slowly
-    this.tweens.add({
-      targets: [key, keyHandle],
-      angle: -360,
-      duration: 4000,
-      repeat: -1,
-      ease: 'Linear',
-    });
-
-    // Make creature interactive
-    this.creatureBody.setInteractive({ useHandCursor: true });
-    this.creatureBody.on('pointerdown', () => {
-      this.petCreature();
     });
   }
 

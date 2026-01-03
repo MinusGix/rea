@@ -5,6 +5,7 @@
     "type": "clockwork",
     "stage": 1,
     "description": "A tiny mechanical frog with a single wind-up key on its back. Its compression spring is visible through a small window in its brass body.",
+    "sprite": "hop_spring.png",
     "baseStats": {
       "strength": 5,
       "speed": 7,

@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import CreatureDatabase from '../../creatures/CreatureDatabase';
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -34,8 +35,17 @@ export class BootScene extends Phaser.Scene {
       loadingText.destroy();
     });
 
-    // TODO: Load actual game assets here
-    // For now, just add a small delay to show the loading screen
+    // Load creature sprites
+    const basePath = 'assets/sprites/';
+    const creatures = CreatureDatabase.getAllCreatures();
+
+    creatures.forEach(creature => {
+      if (creature.sprite) {
+        this.load.image(creature.id, basePath + creature.sprite);
+      }
+    });
+
+    console.log(`🎨 Loading ${creatures.filter(c => c.sprite).length} creature sprites...`);
   }
 
   create() {

@@ -108,9 +108,17 @@ export class CollectionScene extends Phaser.Scene {
         fontStyle: 'bold',
       }).setOrigin(0.5);
 
-      // Creature preview (simple colored circle for now)
-      const preview = this.add.circle(0, -30, 40, creature.color);
-      preview.setStrokeStyle(2, creature.accentColor);
+      // Creature preview (sprite or colored circle)
+      let preview: Phaser.GameObjects.GameObject;
+      if (creature.sprite && this.textures.exists(creature.id)) {
+        const sprite = this.add.image(0, -30, creature.id);
+        sprite.setScale(0.08); // Small preview size
+        preview = sprite;
+      } else {
+        const circle = this.add.circle(0, -30, 40, creature.color);
+        circle.setStrokeStyle(2, creature.accentColor);
+        preview = circle;
+      }
 
       // Name
       const nameText = this.add.text(0, 30, creature.name, {
@@ -210,9 +218,17 @@ export class CollectionScene extends Phaser.Scene {
     // Details content
     const detailsContainer = this.add.container(width / 2, height / 2 - modalHeight / 2 + 100);
 
-    // Creature preview (larger)
-    const preview = this.add.circle(0, 0, 60, creature.color);
-    preview.setStrokeStyle(3, creature.accentColor);
+    // Creature preview (larger sprite or circle)
+    let preview: Phaser.GameObjects.GameObject;
+    if (creature.sprite && this.textures.exists(creature.id)) {
+      const sprite = this.add.image(0, 0, creature.id);
+      sprite.setScale(0.15); // Larger preview for detail view
+      preview = sprite;
+    } else {
+      const circle = this.add.circle(0, 0, 60, creature.color);
+      circle.setStrokeStyle(3, creature.accentColor);
+      preview = circle;
+    }
 
     // Name
     const nameText = this.add.text(0, 80, creature.name, {
