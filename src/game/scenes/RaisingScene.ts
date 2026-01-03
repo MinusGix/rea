@@ -1,17 +1,21 @@
 import Phaser from 'phaser';
 import CreatureDatabase from '../../creatures/CreatureDatabase';
 import GameData from '../../creatures/GameData';
-import { CreatureDefinition } from '../../creatures/types';
+import CreatureManager from '../../creatures/CreatureManager';
+import { CreatureDefinition, CreatureInstance } from '../../creatures/types';
 
 export class RaisingScene extends Phaser.Scene {
   private creature?: Phaser.GameObjects.Container;
   private creatureBody?: Phaser.GameObjects.Arc;
   private hungerBar?: Phaser.GameObjects.Graphics;
   private happinessBar?: Phaser.GameObjects.Graphics;
-  private hunger: number = 80;
-  private happiness: number = 75;
 
-  private currentCreature?: CreatureDefinition;
+  private creatureInstance?: CreatureInstance;
+  private currentDefinition?: CreatureDefinition;
+
+  private nameText?: Phaser.GameObjects.Text;
+  private infoText?: Phaser.GameObjects.Text;
+  private statsText?: Phaser.GameObjects.Text;
 
   constructor() {
     super({ key: 'RaisingScene' });
@@ -21,14 +25,16 @@ export class RaisingScene extends Phaser.Scene {
     const centerX = this.cameras.main.width / 2;
     const centerY = this.cameras.main.height / 2;
 
-    // Load starter creature (Hop Spring)
-    this.currentCreature = CreatureDatabase.getCreature('hop_spring');
-    if (this.currentCreature) {
-      GameData.discoverCreature(this.currentCreature.id);
+    // Create or load creature instance
+    this.creatureInstance = CreatureManager.createInstance('hop_spring', 'My First Creature');
+    this.currentDefinition = CreatureDatabase.getCreature(this.creatureInstance.definitionId);
+
+    if (this.currentDefinition) {
+      GameData.discoverCreature(this.currentDefinition.id);
     }
 
     // Title
-    this.add.text(centerX, 60, this.currentCreature?.name || 'Your Creature', {
+    this.nameText = this.add.text(centerX, 60, this.getCurrentName(), {
       fontSize: '28px',
       color: '#8B4513',
       fontFamily: 'Arial, sans-serif',
@@ -53,19 +59,59 @@ export class RaisingScene extends Phaser.Scene {
       this.scene.start('MenuScene');
     });
 
-    // Creature name
-    this.add.text(centerX, centerY + 150, this.currentCreature?.name || 'Unknown', {
-      fontSize: '32px',
-      color: '#8B4513',
-      fontFamily: 'Arial, sans-serif',
-      fontStyle: 'bold',
-    }).setOrigin(0.5);
-
-    this.add.text(centerX, centerY + 190, `Age: 0 days | Stage: ${this.currentCreature?.stage || 1} | ${this.currentCreature?.type.toUpperCase() || 'UNKNOWN'}`, {
+    // Creature info
+    this.infoText = this.add.text(centerX, centerY + 150, this.getInfoText(), {
       fontSize: '18px',
       color: '#A0826D',
       fontFamily: 'Arial, sans-serif',
+      align: 'center',
     }).setOrigin(0.5);
+
+    // Stats display
+    this.statsText = this.add.text(centerX, centerY + 200, this.getStatsText(), {
+      fontSize: '16px',
+      color: '#8B4513',
+      fontFamily: 'Arial, sans-serif',
+      align: 'center',
+    }).setOrigin(0.5);
+  }
+
+  private getCurrentName(): string {
+    return this.currentDefinition?.name || 'Unknown';
+  }
+
+  private getInfoText(): string {
+    if (!this.creatureInstance || !this.currentDefinition) return '';
+
+    const age = Math.floor(this.creatureInstance.ageInHours / 24);
+    const level = CreatureManager.calculateLevel(this.creatureInstance);
+
+    return `Level ${level} | Age: ${age} days | Stage: ${this.currentDefinition.stage} | ${this.currentDefinition.type.toUpperCase()}`;
+  }
+
+  private getStatsText(): string {
+    if (!this.creatureInstance) return '';
+
+    const stats = this.creatureInstance.currentStats;
+    return `STR ${stats.strength} | SPD ${stats.speed} | INT ${stats.intelligence} | DEF ${stats.defense} | STA ${stats.stamina}`;
+  }
+
+  private updateUI() {
+    if (this.nameText && this.currentDefinition) {
+      this.nameText.setText(this.getCurrentName());
+    }
+    if (this.infoText) {
+      this.infoText.setText(this.getInfoText());
+    }
+    if (this.statsText) {
+      this.statsText.setText(this.getStatsText());
+    }
+    if (this.hungerBar && this.creatureInstance) {
+      this.updateBar(this.hungerBar, 180, 710, 300, 30, this.creatureInstance.hunger, 0x4CAF50);
+    }
+    if (this.happinessBar && this.creatureInstance) {
+      this.updateBar(this.happinessBar, 180, 770, 300, 30, this.creatureInstance.happiness, 0xFFEB3B);
+    }
   }
 
   private createPlaceholderCreature(x: number, y: number) {
@@ -73,15 +119,15 @@ export class RaisingScene extends Phaser.Scene {
     this.creature = this.add.container(x, y);
 
     // Get colors from creature data
-    const bodyColor = this.currentCreature?.color || 0xB8860B;
-    const accentColor = this.currentCreature?.accentColor || 0xD2691E;
+    const bodyColor = this.currentDefinition?.color || 0xB8860B;
+    const accentColor = this.currentDefinition?.accentColor || 0xD2691E;
 
     // Plastic stand (translucent)
     const stand = this.add.ellipse(0, 120, 140, 35, accentColor, 0.4);
     stand.setStrokeStyle(2, accentColor, 0.6);
 
     // Check if sprite is loaded
-    const creatureId = this.currentCreature?.id;
+    const creatureId = this.currentDefinition?.id;
     const hasSprite = creatureId && this.textures.exists(creatureId);
 
     if (hasSprite && creatureId) {
@@ -159,7 +205,8 @@ export class RaisingScene extends Phaser.Scene {
     hungerBg.setOrigin(0, 0);
 
     this.hungerBar = this.add.graphics();
-    this.updateBar(this.hungerBar, startX + 120, startY + 10, barWidth, barHeight, this.hunger, 0x4CAF50);
+    const initialHunger = this.creatureInstance?.hunger || 80;
+    this.updateBar(this.hungerBar, startX + 120, startY + 10, barWidth, barHeight, initialHunger, 0x4CAF50);
 
     // Happiness label and bar
     this.add.text(startX, startY + 60, 'Happiness:', {
@@ -172,7 +219,8 @@ export class RaisingScene extends Phaser.Scene {
     happinessBg.setOrigin(0, 0);
 
     this.happinessBar = this.add.graphics();
-    this.updateBar(this.happinessBar, startX + 120, startY + 70, barWidth, barHeight, this.happiness, 0xFFEB3B);
+    const initialHappiness = this.creatureInstance?.happiness || 75;
+    this.updateBar(this.happinessBar, startX + 120, startY + 70, barWidth, barHeight, initialHappiness, 0xFFEB3B);
   }
 
   private createActionButtons() {
@@ -247,40 +295,135 @@ export class RaisingScene extends Phaser.Scene {
   }
 
   private feedCreature() {
-    this.hunger = Math.min(100, this.hunger + 20);
-    if (this.hungerBar) {
-      this.updateBar(this.hungerBar, 180, 710, 300, 30, this.hunger, 0x4CAF50);
-    }
+    if (!this.creatureInstance) return;
+
+    CreatureManager.feed(this.creatureInstance, 20);
     this.showFloatingText('+20 Hunger', 0x4CAF50);
     this.bounceCreature();
+    this.updateUI();
+    this.checkEvolution();
   }
 
   private playWithCreature() {
-    this.happiness = Math.min(100, this.happiness + 15);
-    if (this.happinessBar) {
-      this.updateBar(this.happinessBar, 180, 770, 300, 30, this.happiness, 0xFFEB3B);
-    }
+    if (!this.creatureInstance) return;
+
+    CreatureManager.play(this.creatureInstance, 15);
     this.showFloatingText('+15 Happiness', 0xFFEB3B);
     this.bounceCreature();
+    this.updateUI();
+    this.checkEvolution();
   }
 
   private trainCreature() {
-    this.showFloatingText('Training! +STR', 0x2196F3);
+    if (!this.creatureInstance) return;
+
+    // Train strength by default (could rotate between stats)
+    CreatureManager.train(this.creatureInstance, 'strength', 2);
+    this.showFloatingText('Training! STR +2', 0x2196F3);
     this.bounceCreature();
+    this.updateUI();
+    this.checkEvolution();
   }
 
   private showStatus() {
-    console.log('Status:', { hunger: this.hunger, happiness: this.happiness });
+    if (!this.creatureInstance) return;
+
+    console.log('Creature Status:', this.creatureInstance);
     this.showFloatingText('Check console!', 0x9C27B0);
   }
 
   private petCreature() {
-    this.happiness = Math.min(100, this.happiness + 5);
-    if (this.happinessBar) {
-      this.updateBar(this.happinessBar, 180, 770, 300, 30, this.happiness, 0xFFEB3B);
-    }
+    if (!this.creatureInstance) return;
+
+    CreatureManager.play(this.creatureInstance, 5);
     this.showFloatingText('❤️', 0xFF69B4);
     this.scaleCreature();
+    this.updateUI();
+  }
+
+  private checkEvolution() {
+    if (!this.creatureInstance) return;
+
+    const evolutionTarget = CreatureManager.checkEvolution(this.creatureInstance);
+
+    if (evolutionTarget) {
+      // Evolution triggered!
+      this.triggerEvolution(evolutionTarget);
+    }
+  }
+
+  private triggerEvolution(targetId: string) {
+    if (!this.creatureInstance) return;
+
+    const oldDefinition = this.currentDefinition;
+
+    // Evolve the creature
+    CreatureManager.evolve(this.creatureInstance, targetId);
+
+    // Update current definition
+    this.currentDefinition = CreatureDatabase.getCreature(this.creatureInstance.definitionId);
+
+    // Show evolution animation
+    this.showEvolutionAnimation(oldDefinition?.name || '???', this.currentDefinition?.name || '???');
+
+    // Recreate creature sprite (if it changed)
+    if (this.creature) {
+      this.creature.destroy();
+      const centerX = this.cameras.main.width / 2;
+      const centerY = this.cameras.main.height / 2;
+      this.createPlaceholderCreature(centerX, centerY - 100);
+    }
+
+    this.updateUI();
+  }
+
+  private showEvolutionAnimation(oldName: string, newName: string) {
+    const centerX = this.cameras.main.width / 2;
+    const centerY = this.cameras.main.height / 2;
+
+    // Flash effect
+    const flash = this.add.rectangle(centerX, centerY, this.cameras.main.width, this.cameras.main.height, 0xFFFFFF, 0);
+    this.tweens.add({
+      targets: flash,
+      alpha: 0.8,
+      duration: 200,
+      yoyo: true,
+      repeat: 2,
+      onComplete: () => {
+        flash.destroy();
+      },
+    });
+
+    // Evolution text
+    const evolutionText = this.add.text(centerX, centerY, `EVOLUTION!\n\n${oldName}\n↓\n${newName}`, {
+      fontSize: '48px',
+      color: '#FFD700',
+      fontFamily: 'Arial, sans-serif',
+      fontStyle: 'bold',
+      align: 'center',
+      stroke: '#8B4513',
+      strokeThickness: 6,
+    }).setOrigin(0.5).setAlpha(0);
+
+    this.tweens.add({
+      targets: evolutionText,
+      alpha: 1,
+      scale: 1.2,
+      duration: 500,
+      ease: 'Back.easeOut',
+      onComplete: () => {
+        this.time.delayedCall(2000, () => {
+          this.tweens.add({
+            targets: evolutionText,
+            alpha: 0,
+            duration: 500,
+            onComplete: () => {
+              evolutionText.destroy();
+            },
+          });
+        });
+      },
+    });
   }
 
   private bounceCreature() {
