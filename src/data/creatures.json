@@ -1,0 +1,292 @@
+{
+  "hop_spring": {
+    "id": "hop_spring",
+    "name": "Hop Spring",
+    "type": "clockwork",
+    "stage": 1,
+    "description": "A tiny mechanical frog with a single wind-up key on its back. Its compression spring is visible through a small window in its brass body.",
+    "baseStats": {
+      "strength": 5,
+      "speed": 7,
+      "intelligence": 5,
+      "defense": 4,
+      "stamina": 6
+    },
+    "color": 11829515,
+    "accentColor": 13789470,
+    "evolutions": [
+      {
+        "targetId": "leap_coil",
+        "conditions": [
+          { "type": "age", "hours": 72 },
+          { "type": "stat", "stat": "speed", "value": 15 }
+        ],
+        "description": "Focus on agility training"
+      },
+      {
+        "targetId": "spring_tank",
+        "conditions": [
+          { "type": "age", "hours": 72 },
+          { "type": "stat", "stat": "strength", "value": 15 }
+        ],
+        "description": "Focus on strength training"
+      }
+    ],
+    "discoveryText": "A common starter creature found in the Gear Garden. Wind it up and watch it hop!",
+    "rarity": "common"
+  },
+  "leap_coil": {
+    "id": "leap_coil",
+    "name": "Leap Coil",
+    "type": "clockwork",
+    "stage": 2,
+    "description": "Added leg springs and a streamlined body make this creature incredibly nimble. Its chrome finish gleams as it bounds.",
+    "baseStats": {
+      "strength": 8,
+      "speed": 18,
+      "intelligence": 8,
+      "defense": 6,
+      "stamina": 10
+    },
+    "color": 12632256,
+    "accentColor": 255,
+    "evolvesFrom": "hop_spring",
+    "evolutions": [
+      {
+        "targetId": "rocket_hopper",
+        "conditions": [
+          { "type": "age", "hours": 168 },
+          { "type": "stat", "stat": "speed", "value": 35 }
+        ],
+        "description": "Pure speed focus"
+      },
+      {
+        "targetId": "vault_frog_speed",
+        "conditions": [
+          { "type": "age", "hours": 168 },
+          { "type": "stat", "stat": "speed", "value": 25 },
+          { "type": "stat", "stat": "intelligence", "value": 20 }
+        ],
+        "description": "Balance speed and intelligence"
+      }
+    ],
+    "discoveryText": "Chrome-plated and aerodynamic. This mechanical jumper can clear incredible heights!",
+    "rarity": "uncommon"
+  },
+  "spring_tank": {
+    "id": "spring_tank",
+    "name": "Spring Tank",
+    "type": "clockwork",
+    "stage": 2,
+    "description": "Thicker springs and armored plating make this creature a powerhouse. Slow but devastating.",
+    "baseStats": {
+      "strength": 18,
+      "speed": 6,
+      "intelligence": 7,
+      "defense": 15,
+      "stamina": 14
+    },
+    "color": 13467442,
+    "accentColor": 16711680,
+    "evolvesFrom": "hop_spring",
+    "evolutions": [
+      {
+        "targetId": "bastion_toad",
+        "conditions": [
+          { "type": "age", "hours": 168 },
+          { "type": "stat", "stat": "strength", "value": 35 }
+        ],
+        "description": "Pure strength focus"
+      },
+      {
+        "targetId": "vault_frog_strength",
+        "conditions": [
+          { "type": "age", "hours": 168 },
+          { "type": "stat", "stat": "strength", "value": 25 },
+          { "type": "stat", "stat": "intelligence", "value": 20 }
+        ],
+        "description": "Balance strength and intelligence"
+      }
+    ],
+    "discoveryText": "Heavily armored with bronze plating. This tank can take a beating and dish one out!",
+    "rarity": "uncommon"
+  },
+  "rocket_hopper": {
+    "id": "rocket_hopper",
+    "name": "Rocket Hopper",
+    "type": "clockwork",
+    "stage": 3,
+    "description": "Sleek and aerodynamic with multiple coiled springs in its legs. Leaves a trail of sparks when it moves.",
+    "baseStats": {
+      "strength": 12,
+      "speed": 45,
+      "intelligence": 15,
+      "defense": 8,
+      "stamina": 20
+    },
+    "color": 12632256,
+    "accentColor": 65535,
+    "evolvesFrom": "leap_coil",
+    "evolutions": [
+      {
+        "targetId": "champion_silver_streak",
+        "conditions": [
+          { "type": "age", "hours": 336 },
+          { "type": "stat", "stat": "speed", "value": 60 },
+          { "type": "happiness", "value": 80 }
+        ],
+        "description": "Master of speed"
+      }
+    ],
+    "discoveryText": "The fastest of the Spring series. Blink and you'll miss it!",
+    "rarity": "rare"
+  },
+  "bastion_toad": {
+    "id": "bastion_toad",
+    "name": "Bastion Toad",
+    "type": "clockwork",
+    "stage": 3,
+    "description": "Massive coil springs and heavy armor plating. Multiple compression mechanisms give it tremendous power.",
+    "baseStats": {
+      "strength": 45,
+      "speed": 8,
+      "intelligence": 12,
+      "defense": 35,
+      "stamina": 30
+    },
+    "color": 13467442,
+    "accentColor": 16711680,
+    "evolvesFrom": "spring_tank",
+    "evolutions": [
+      {
+        "targetId": "champion_iron_guard",
+        "conditions": [
+          { "type": "age", "hours": 336 },
+          { "type": "stat", "stat": "strength", "value": 60 },
+          { "type": "happiness", "value": 80 }
+        ],
+        "description": "Master of strength"
+      }
+    ],
+    "discoveryText": "An immovable object. This fortress can withstand any assault!",
+    "rarity": "rare"
+  },
+  "vault_frog_speed": {
+    "id": "vault_frog_speed",
+    "name": "Vault Frog",
+    "type": "clockwork",
+    "stage": 3,
+    "description": "Chrome variant. Calculating trajectory gears visible in its glass dome head. Balanced springs allow precise movements.",
+    "baseStats": {
+      "strength": 15,
+      "speed": 35,
+      "intelligence": 30,
+      "defense": 15,
+      "stamina": 25
+    },
+    "color": 12632256,
+    "accentColor": 10494192,
+    "evolvesFrom": "leap_coil",
+    "evolutions": [
+      {
+        "targetId": "scholar_wise_spring",
+        "conditions": [
+          { "type": "age", "hours": 336 },
+          { "type": "stat", "stat": "intelligence", "value": 50 }
+        ],
+        "description": "Path of wisdom"
+      }
+    ],
+    "discoveryText": "A tactical genius that calculates every jump with precision.",
+    "rarity": "rare"
+  },
+  "vault_frog_strength": {
+    "id": "vault_frog_strength",
+    "name": "Vault Frog",
+    "type": "clockwork",
+    "stage": 3,
+    "description": "Bronze variant. Calculating trajectory gears visible in its glass dome head. Balanced springs allow powerful movements.",
+    "baseStats": {
+      "strength": 35,
+      "speed": 15,
+      "intelligence": 30,
+      "defense": 20,
+      "stamina": 25
+    },
+    "color": 13467442,
+    "accentColor": 10494192,
+    "evolvesFrom": "spring_tank",
+    "evolutions": [
+      {
+        "targetId": "scholar_wise_spring",
+        "conditions": [
+          { "type": "age", "hours": 336 },
+          { "type": "stat", "stat": "intelligence", "value": 50 }
+        ],
+        "description": "Path of wisdom"
+      }
+    ],
+    "discoveryText": "A tactical genius that calculates every jump with devastating force.",
+    "rarity": "rare"
+  },
+  "champion_silver_streak": {
+    "id": "champion_silver_streak",
+    "name": "Champion Mk.V 'Silver Streak'",
+    "type": "clockwork",
+    "stage": 4,
+    "description": "A sleek mechanical raptor/greyhound hybrid. Visible flywheel stores momentum. The pinnacle of speed engineering.",
+    "baseStats": {
+      "strength": 25,
+      "speed": 75,
+      "intelligence": 35,
+      "defense": 20,
+      "stamina": 45
+    },
+    "color": 12632256,
+    "accentColor": 65535,
+    "evolvesFrom": "rocket_hopper",
+    "evolutions": [],
+    "discoveryText": "The legendary Silver Streak. None can match its velocity!",
+    "rarity": "legendary"
+  },
+  "champion_iron_guard": {
+    "id": "champion_iron_guard",
+    "name": "Champion Mk.V 'Iron Guard'",
+    "type": "clockwork",
+    "stage": 4,
+    "description": "Same Champion Mk.V frame, but built for defense. Bulkier armor plating and reinforced springs.",
+    "baseStats": {
+      "strength": 70,
+      "speed": 15,
+      "intelligence": 30,
+      "defense": 60,
+      "stamina": 55
+    },
+    "color": 13467442,
+    "accentColor": 8421504,
+    "evolvesFrom": "bastion_toad",
+    "evolutions": [],
+    "discoveryText": "The legendary Iron Guard. An unbreakable fortress of brass and determination!",
+    "rarity": "legendary"
+  },
+  "scholar_wise_spring": {
+    "id": "scholar_wise_spring",
+    "name": "Scholar Mk.III 'Wise Spring'",
+    "type": "clockwork",
+    "stage": 4,
+    "description": "Mechanical owl/frog hybrid with intricate calculation gears in a glass dome head. Master of strategy.",
+    "baseStats": {
+      "strength": 30,
+      "speed": 30,
+      "intelligence": 70,
+      "defense": 25,
+      "stamina": 45
+    },
+    "color": 14737632,
+    "accentColor": 10494192,
+    "evolvesFrom": "vault_frog_speed",
+    "evolutions": [],
+    "discoveryText": "The legendary Wise Spring. Its intellect is unmatched in the Clockwork Menagerie!",
+    "rarity": "legendary"
+  }
+}

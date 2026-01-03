@@ -1,4 +1,7 @@
 import Phaser from 'phaser';
+import CreatureDatabase from '../../creatures/CreatureDatabase';
+import GameData from '../../creatures/GameData';
+import { CreatureDefinition } from '../../creatures/types';
 
 export class RaisingScene extends Phaser.Scene {
   private creature?: Phaser.GameObjects.Container;
@@ -8,6 +11,8 @@ export class RaisingScene extends Phaser.Scene {
   private hunger: number = 80;
   private happiness: number = 75;
 
+  private currentCreature?: CreatureDefinition;
+
   constructor() {
     super({ key: 'RaisingScene' });
   }
@@ -16,15 +21,21 @@ export class RaisingScene extends Phaser.Scene {
     const centerX = this.cameras.main.width / 2;
     const centerY = this.cameras.main.height / 2;
 
+    // Load starter creature (Hop Spring)
+    this.currentCreature = CreatureDatabase.getCreature('hop_spring');
+    if (this.currentCreature) {
+      GameData.discoverCreature(this.currentCreature.id);
+    }
+
     // Title
-    this.add.text(centerX, 60, 'Your Creature', {
+    this.add.text(centerX, 60, this.currentCreature?.name || 'Your Creature', {
       fontSize: '28px',
       color: '#8B4513',
       fontFamily: 'Arial, sans-serif',
       fontStyle: 'bold',
     }).setOrigin(0.5);
 
-    // Create placeholder creature (Hop Spring baby form)
+    // Create placeholder creature
     this.createPlaceholderCreature(centerX, centerY - 100);
 
     // Create UI
@@ -43,14 +54,14 @@ export class RaisingScene extends Phaser.Scene {
     });
 
     // Creature name
-    this.add.text(centerX, centerY + 150, 'Hop Spring', {
+    this.add.text(centerX, centerY + 150, this.currentCreature?.name || 'Unknown', {
       fontSize: '32px',
       color: '#8B4513',
       fontFamily: 'Arial, sans-serif',
       fontStyle: 'bold',
     }).setOrigin(0.5);
 
-    this.add.text(centerX, centerY + 190, 'Age: 0 days | Stage: Baby', {
+    this.add.text(centerX, centerY + 190, `Age: 0 days | Stage: ${this.currentCreature?.stage || 1} | ${this.currentCreature?.type.toUpperCase() || 'UNKNOWN'}`, {
       fontSize: '18px',
       color: '#A0826D',
       fontFamily: 'Arial, sans-serif',
@@ -61,20 +72,24 @@ export class RaisingScene extends Phaser.Scene {
     // Container for creature parts
     this.creature = this.add.container(x, y);
 
-    // Plastic stand (translucent)
-    const stand = this.add.ellipse(0, 100, 120, 30, 0xFFD700, 0.4);
-    stand.setStrokeStyle(2, 0xDAA520, 0.6);
+    // Get colors from creature data
+    const bodyColor = this.currentCreature?.color || 0xB8860B;
+    const accentColor = this.currentCreature?.accentColor || 0xD2691E;
 
-    // Creature body (brass colored circle representing mechanical frog)
-    this.creatureBody = this.add.circle(0, 0, 60, 0xB8860B);
-    this.creatureBody.setStrokeStyle(3, 0x8B6914);
+    // Plastic stand (translucent)
+    const stand = this.add.ellipse(0, 100, 120, 30, accentColor, 0.4);
+    stand.setStrokeStyle(2, accentColor, 0.6);
+
+    // Creature body (use creature's color)
+    this.creatureBody = this.add.circle(0, 0, 60, bodyColor);
+    this.creatureBody.setStrokeStyle(3, accentColor);
 
     // Wind-up key on back
-    const key = this.add.rectangle(50, 0, 12, 40, 0x8B6914);
-    const keyHandle = this.add.circle(50, -25, 8, 0x8B6914);
+    const key = this.add.rectangle(50, 0, 12, 40, accentColor);
+    const keyHandle = this.add.circle(50, -25, 8, accentColor);
 
-    // Simple spring (copper colored)
-    const spring = this.add.rectangle(0, 30, 20, 40, 0xD2691E);
+    // Simple spring
+    const spring = this.add.rectangle(0, 30, 20, 40, accentColor);
 
     // Eyes
     const leftEye = this.add.circle(-20, -10, 8, 0x000000);

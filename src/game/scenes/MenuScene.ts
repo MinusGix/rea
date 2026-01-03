@@ -1,6 +1,10 @@
 import Phaser from 'phaser';
+import GameData from '../../creatures/GameData';
+import CreatureDatabase from '../../creatures/CreatureDatabase';
 
 export class MenuScene extends Phaser.Scene {
+  private debugToggle?: Phaser.GameObjects.Text;
+
   constructor() {
     super({ key: 'MenuScene' });
   }
@@ -68,6 +72,68 @@ export class MenuScene extends Phaser.Scene {
       console.log('🎮 Starting game...');
       this.scene.start('RaisingScene');
     });
+
+    // Collection button
+    const collectionButtonBg = this.add.rectangle(
+      centerX,
+      buttonY + 100,
+      buttonWidth,
+      buttonHeight,
+      0x9C27B0
+    ).setInteractive({ useHandCursor: true });
+
+    this.add.text(centerX, buttonY + 100, '📚 COLLECTION', {
+      fontSize: '32px',
+      color: '#FFFFFF',
+      fontFamily: 'Arial, sans-serif',
+      fontStyle: 'bold',
+    }).setOrigin(0.5);
+
+    collectionButtonBg.on('pointerover', () => {
+      collectionButtonBg.setFillStyle(0xAB47BC);
+    });
+
+    collectionButtonBg.on('pointerout', () => {
+      collectionButtonBg.setFillStyle(0x9C27B0);
+    });
+
+    collectionButtonBg.on('pointerdown', () => {
+      collectionButtonBg.setFillStyle(0x8E24AA);
+    });
+
+    collectionButtonBg.on('pointerup', () => {
+      console.log('📚 Opening collection...');
+      this.scene.start('CollectionScene');
+    });
+
+    // Debug toggle (top-right corner)
+    this.debugToggle = this.add.text(
+      this.cameras.main.width - 20,
+      20,
+      `🐛 ${GameData.debugMode ? 'ON' : 'OFF'}`,
+      {
+        fontSize: '20px',
+        color: GameData.debugMode ? '#FF0000' : '#888888',
+        fontFamily: 'Arial, sans-serif',
+        fontStyle: 'bold',
+      }
+    ).setOrigin(1, 0).setInteractive({ useHandCursor: true });
+
+    this.debugToggle.on('pointerdown', () => {
+      const newMode = GameData.toggleDebugMode();
+      if (this.debugToggle) {
+        this.debugToggle.setText(`🐛 ${newMode ? 'ON' : 'OFF'}`);
+        this.debugToggle.setColor(newMode ? '#FF0000' : '#888888');
+      }
+    });
+
+    // Creature count
+    const totalCreatures = CreatureDatabase.getAllCreatures().length;
+    this.add.text(centerX, centerY - 180, `${totalCreatures} creatures to discover!`, {
+      fontSize: '18px',
+      color: '#A0826D',
+      fontFamily: 'Arial, sans-serif',
+    }).setOrigin(0.5);
 
     // Version info
     this.add.text(20, this.cameras.main.height - 30, 'v0.1.0 - Alpha', {
