@@ -4,7 +4,6 @@ import GameData from '../../creatures/GameData';
 import { CreatureDefinition } from '../../creatures/types';
 
 export class CollectionScene extends Phaser.Scene {
-  private selectedCreature?: CreatureDefinition;
   private creatureCards: Phaser.GameObjects.Container[] = [];
 
   constructor() {
@@ -14,7 +13,6 @@ export class CollectionScene extends Phaser.Scene {
   create() {
     const centerX = this.cameras.main.width / 2;
     const width = this.cameras.main.width;
-    const height = this.cameras.main.height;
 
     // Title
     this.add.text(centerX, 60, '📚 CREATURE COLLECTION 📚', {
