@@ -10,18 +10,10 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
   parent: 'game-container',
   backgroundColor: '#f4e4c1',
   scale: {
-    mode: Phaser.Scale.FIT,
+    mode: Phaser.Scale.RESIZE,
     autoCenter: Phaser.Scale.CENTER_BOTH,
-    width: 720,
-    height: 1280,
-    min: {
-      width: 360,
-      height: 640,
-    },
-    max: {
-      width: 1080,
-      height: 1920,
-    },
+    width: window.innerWidth,
+    height: window.innerHeight,
   },
   physics: {
     default: 'arcade',

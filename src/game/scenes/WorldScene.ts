@@ -6,7 +6,7 @@ import CreatureManager from '../../creatures/CreatureManager';
 import { CreatureInstance, Stats } from '../../creatures/types';
 
 export class WorldScene extends Phaser.Scene {
-  private hexSize: number = 70;  // Reduced from 100 to fit more on screen
+  private hexSize: number = 60;  // Base hex size, will be scaled
   private rooms: Map<string, HexRoom> = new Map();
   private roomGraphics: Map<string, Phaser.GameObjects.Container> = new Map();
 
@@ -14,6 +14,7 @@ export class WorldScene extends Phaser.Scene {
   private creatureSprites: Map<string, Phaser.GameObjects.Container> = new Map();
 
   private worldContainer?: Phaser.GameObjects.Container;
+  private uiElements: Phaser.GameObjects.GameObject[] = [];
 
   // Drag-and-drop state
   private draggedCreature?: { creatureId: string; originalRoom: HexRoom; sprite: Phaser.GameObjects.Container };
@@ -28,15 +29,13 @@ export class WorldScene extends Phaser.Scene {
     // Create world container for panning/zooming
     this.worldContainer = this.add.container(0, 0);
 
-    // Center camera
-    const centerX = this.cameras.main.width / 2;
-    const centerY = this.cameras.main.height / 2;
-    this.worldContainer.setPosition(centerX, centerY);
-
     // Create initial rooms (hardcoded layout for now)
     this.createInitialRooms();
 
-    // Create test creatures
+    // Render all rooms FIRST
+    this.renderRooms();
+
+    // Create test creatures AFTER rooms (so they render on top)
     const testCreatures = [
       { id: 'hop_spring', name: 'Hoppy', roomType: 'play' as RoomType },
       { id: 'hop_spring', name: 'Bouncer', roomType: 'gym' as RoomType },
@@ -57,17 +56,20 @@ export class WorldScene extends Phaser.Scene {
       }
     });
 
-    // Render all rooms
-    this.renderRooms();
-
     // UI
     this.createUI();
+
+    // Position and zoom to fit screen
+    this.resizeWorld();
+
+    // Listen for resize events (orientation change)
+    this.scale.on('resize', this.handleResize, this);
 
     // Camera controls (pinch zoom, pan - simplified for now)
     this.input.on('wheel', (_pointer: Phaser.Input.Pointer, _gameObjects: Phaser.GameObjects.GameObject[], _deltaX: number, deltaY: number) => {
       if (this.worldContainer) {
         const zoom = this.worldContainer.scale;
-        const newZoom = Phaser.Math.Clamp(zoom - deltaY * 0.001, 0.5, 2);
+        const newZoom = Phaser.Math.Clamp(zoom - deltaY * 0.001, 0.3, 2);
         this.worldContainer.setScale(newZoom);
       }
     });
@@ -76,6 +78,44 @@ export class WorldScene extends Phaser.Scene {
     this.startRoomEffects();
 
     console.log('🏠 World created with hexagonal rooms!');
+  }
+
+  private handleResize(gameSize: Phaser.Structs.Size) {
+    // Update camera
+    this.cameras.main.setSize(gameSize.width, gameSize.height);
+
+    // Reposition and rescale world
+    this.resizeWorld();
+
+    // Recreate UI for new size
+    this.createUI();
+  }
+
+  private resizeWorld() {
+    if (!this.worldContainer) return;
+
+    const width = this.cameras.main.width;
+    const height = this.cameras.main.height;
+
+    // Center the world container
+    this.worldContainer.setPosition(width / 2, height / 2);
+
+    // Calculate zoom to fit all rooms on screen
+    // Room layout spans roughly:
+    // q: -1 to 2 (4 hexes wide)
+    // r: 0 to 2 (3 hexes tall)
+    const hexWidth = this.hexSize * Math.sqrt(3);
+    const hexHeight = this.hexSize * 2;
+
+    const worldWidth = hexWidth * 4;
+    const worldHeight = hexHeight * 2.5;
+
+    // Calculate scale to fit with padding
+    const scaleX = (width * 0.9) / worldWidth;
+    const scaleY = (height * 0.9) / worldHeight;
+    const scale = Math.min(scaleX, scaleY);
+
+    this.worldContainer.setScale(scale);
   }
 
   private createInitialRooms() {
@@ -193,16 +233,19 @@ export class WorldScene extends Phaser.Scene {
 
     if (hasSprite) {
       const sprite = this.add.image(0, 0, definition.id);
-      sprite.setScale(0.06); // Smaller for tighter grid view
+      sprite.setScale(0.03); // Much smaller for tight fit
       container.add(sprite);
       interactiveObject = sprite;
     } else {
       // Fallback circle
-      const circle = this.add.circle(0, 0, 12, definition.color);
+      const circle = this.add.circle(0, 0, 8, definition.color);
       circle.setStrokeStyle(1, definition.accentColor);
       container.add(circle);
       interactiveObject = circle;
     }
+
+    // Set depth to render above rooms
+    container.setDepth(10);
 
     // Make interactive for drag-and-drop
     interactiveObject.setInteractive({ useHandCursor: true, draggable: true });
@@ -378,6 +421,10 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private createUI() {
+    // Clear old UI elements
+    this.uiElements.forEach(element => element.destroy());
+    this.uiElements = [];
+
     const width = this.cameras.main.width;
     const height = this.cameras.main.height;
 
@@ -388,31 +435,40 @@ export class WorldScene extends Phaser.Scene {
       fontFamily: 'Arial, sans-serif',
       backgroundColor: '#F5DEB3',
       padding: { x: 10, y: 5 },
-    }).setInteractive({ useHandCursor: true });
+    }).setInteractive({ useHandCursor: true })
+    .setScrollFactor(0)
+    .setDepth(1000);
 
     backButton.on('pointerdown', () => {
       this.scene.start('MenuScene');
     });
 
     // Title
-    this.add.text(width / 2, 30, 'Creature World', {
+    const title = this.add.text(width / 2, 30, 'Creature World', {
       fontSize: '24px',
       color: '#8B4513',
       fontFamily: 'Arial, sans-serif',
       fontStyle: 'bold',
       backgroundColor: '#F5DEB3',
       padding: { x: 15, y: 8 },
-    }).setOrigin(0.5);
+    }).setOrigin(0.5)
+    .setScrollFactor(0)
+    .setDepth(1000);
 
     // Instructions
-    this.add.text(width / 2, height - 30,
-      'Tap rooms to view | Scroll to zoom', {
+    const instructions = this.add.text(width / 2, height - 30,
+      'Tap & drag creatures | Scroll to zoom', {
       fontSize: '14px',
       color: '#8B4513',
       fontFamily: 'Arial, sans-serif',
       backgroundColor: '#F5DEB3AA',
       padding: { x: 10, y: 5 },
-    }).setOrigin(0.5);
+    }).setOrigin(0.5)
+    .setScrollFactor(0)
+    .setDepth(1000);
+
+    // Track UI elements
+    this.uiElements.push(backButton, title, instructions);
   }
 
   private startRoomEffects() {
