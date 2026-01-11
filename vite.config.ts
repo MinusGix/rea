@@ -8,6 +8,10 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  define: {
+    '__BUILD_TIMESTAMP__': JSON.stringify(Date.now()),
+    '__BUILD_DATE__': JSON.stringify(new Date().toISOString()),
+  },
   build: {
     target: 'esnext',
     minify: 'esbuild',
