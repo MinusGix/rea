@@ -15,6 +15,11 @@ export class WorldScene extends Phaser.Scene {
 
   private worldContainer?: Phaser.GameObjects.Container;
 
+  // Drag-and-drop state
+  private draggedCreature?: { creatureId: string; originalRoom: HexRoom; sprite: Phaser.GameObjects.Container };
+  private originalScale: number = 1;
+  private dragScale: number = 1.3;  // Scale up when picked up
+
   constructor() {
     super({ key: 'WorldScene' });
   }
@@ -31,16 +36,26 @@ export class WorldScene extends Phaser.Scene {
     // Create initial rooms (hardcoded layout for now)
     this.createInitialRooms();
 
-    // Create a starting creature
-    const starter = CreatureManager.createInstance('hop_spring', 'Hoppy');
-    this.creatures.set(starter.id, starter);
+    // Create test creatures
+    const testCreatures = [
+      { id: 'hop_spring', name: 'Hoppy', roomType: 'play' as RoomType },
+      { id: 'hop_spring', name: 'Bouncer', roomType: 'gym' as RoomType },
+      { id: 'hop_spring', name: 'Chompy', roomType: 'cafeteria' as RoomType },
+      { id: 'hop_spring', name: 'Sleepy', roomType: 'bedroom' as RoomType },
+      { id: 'hop_spring', name: 'Speedy', roomType: 'track' as RoomType },
+    ];
 
-    // Place in play room
-    const playRoom = Array.from(this.rooms.values()).find(r => r.config.type === 'play');
-    if (playRoom) {
-      playRoom.creatureIds.push(starter.id);
-      this.createCreatureSprite(starter, playRoom);
-    }
+    testCreatures.forEach(({ id, name, roomType }) => {
+      const creature = CreatureManager.createInstance(id, name);
+      this.creatures.set(creature.id, creature);
+
+      // Find and place in appropriate room
+      const targetRoom = Array.from(this.rooms.values()).find(r => r.config.type === roomType);
+      if (targetRoom) {
+        targetRoom.creatureIds.push(creature.id);
+        this.createCreatureSprite(creature, targetRoom);
+      }
+    });
 
     // Render all rooms
     this.renderRooms();
@@ -174,16 +189,23 @@ export class WorldScene extends Phaser.Scene {
     // Check if sprite exists
     const hasSprite = definition.sprite && this.textures.exists(definition.id);
 
+    let interactiveObject: Phaser.GameObjects.GameObject;
+
     if (hasSprite) {
       const sprite = this.add.image(0, 0, definition.id);
       sprite.setScale(0.06); // Smaller for tighter grid view
       container.add(sprite);
+      interactiveObject = sprite;
     } else {
       // Fallback circle
       const circle = this.add.circle(0, 0, 12, definition.color);
       circle.setStrokeStyle(1, definition.accentColor);
       container.add(circle);
+      interactiveObject = circle;
     }
+
+    // Make interactive for drag-and-drop
+    interactiveObject.setInteractive({ useHandCursor: true, draggable: true });
 
     // Store sprite
     this.creatureSprites.set(creature.id, container);
@@ -192,8 +214,125 @@ export class WorldScene extends Phaser.Scene {
       this.worldContainer.add(container);
     }
 
+    // Add drag handlers
+    this.setupCreatureDragHandlers(creature.id, container, room);
+
     // Start wandering animation
     this.startCreatureWandering(creature.id, room);
+  }
+
+  private setupCreatureDragHandlers(creatureId: string, container: Phaser.GameObjects.Container, room: HexRoom) {
+    const interactiveChild = container.list.find(obj => obj.input?.enabled) as Phaser.GameObjects.GameObject;
+    if (!interactiveChild) return;
+
+    // Store original room for this creature
+    let currentRoom = room;
+
+    interactiveChild.on('dragstart', (_pointer: Phaser.Input.Pointer) => {
+      // Stop wandering animation
+      this.tweens.killTweensOf(container);
+
+      // Scale up to bring "closer to camera"
+      container.setScale(this.dragScale);
+      container.setDepth(1000); // Bring to front
+
+      // Store drag state
+      this.draggedCreature = {
+        creatureId,
+        originalRoom: currentRoom,
+        sprite: container,
+      };
+
+      console.log(`Picked up ${creatureId} from ${currentRoom.config.name}`);
+    });
+
+    interactiveChild.on('drag', (_pointer: Phaser.Input.Pointer, dragX: number, dragY: number) => {
+      // Move container to follow pointer (in world space)
+      if (this.worldContainer) {
+        const worldScale = this.worldContainer.scale;
+        const worldX = this.worldContainer.x;
+        const worldY = this.worldContainer.y;
+
+        // Convert screen coordinates to world coordinates
+        const localX = (dragX - worldX) / worldScale;
+        const localY = (dragY - worldY) / worldScale;
+
+        container.setPosition(localX, localY);
+      }
+    });
+
+    interactiveChild.on('dragend', (_pointer: Phaser.Input.Pointer) => {
+      if (!this.draggedCreature) return;
+
+      // Check if dropped over a valid room
+      const targetRoom = this.getRoomAtPosition(container.x, container.y);
+
+      if (targetRoom) {
+        // Move creature to new room
+        this.moveCreatureToRoom(creatureId, currentRoom, targetRoom);
+        currentRoom = targetRoom;
+
+        // Snap to room center and resume wandering
+        container.setScale(this.originalScale);
+        container.setDepth(0);
+        this.startCreatureWandering(creatureId, targetRoom);
+
+        console.log(`Moved ${creatureId} to ${targetRoom.config.name}`);
+      } else {
+        // Tumble back to original room
+        this.tumbleBackToRoom(container, currentRoom);
+        console.log(`${creatureId} tumbled back to ${currentRoom.config.name}`);
+      }
+
+      // Clear drag state
+      this.draggedCreature = undefined;
+    });
+  }
+
+  private getRoomAtPosition(x: number, y: number): HexRoom | undefined {
+    // Convert position to hex coordinate
+    const hexCoord = HexUtils.pixelToHex(x, y, this.hexSize);
+
+    // Find room at this coordinate
+    const roomKey = this.coordToKey(hexCoord);
+    return this.rooms.get(roomKey);
+  }
+
+  private moveCreatureToRoom(creatureId: string, fromRoom: HexRoom, toRoom: HexRoom) {
+    // Remove from old room
+    const index = fromRoom.creatureIds.indexOf(creatureId);
+    if (index > -1) {
+      fromRoom.creatureIds.splice(index, 1);
+    }
+
+    // Add to new room
+    if (!toRoom.creatureIds.includes(creatureId)) {
+      toRoom.creatureIds.push(creatureId);
+    }
+  }
+
+  private tumbleBackToRoom(container: Phaser.GameObjects.Container, room: HexRoom) {
+    const roomPos = HexUtils.hexToPixel(room.coord, this.hexSize);
+
+    // Tumbling animation - spin and move back
+    this.tweens.add({
+      targets: container,
+      x: roomPos.x,
+      y: roomPos.y,
+      angle: container.angle + 360, // Full rotation
+      scale: this.originalScale,
+      duration: 500,
+      ease: 'Back.easeOut',
+      onComplete: () => {
+        container.setDepth(0);
+        container.setAngle(0); // Reset rotation
+        // Resume wandering
+        const creature = this.creatures.get(this.draggedCreature?.creatureId || '');
+        if (creature) {
+          this.startCreatureWandering(this.draggedCreature?.creatureId || '', room);
+        }
+      },
+    });
   }
 
   private startCreatureWandering(creatureId: string, room: HexRoom) {

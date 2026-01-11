@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import GameData from '../../creatures/GameData';
 import CreatureDatabase from '../../creatures/CreatureDatabase';
+import { BUILD_INFO } from '../../buildInfo';
 
 export class MenuScene extends Phaser.Scene {
   private debugToggle?: Phaser.GameObjects.Text;
@@ -136,8 +137,17 @@ export class MenuScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // Version info
-    this.add.text(20, this.cameras.main.height - 30, 'v0.1.0 - Alpha', {
+    this.add.text(20, this.cameras.main.height - 50, 'v0.1.0 - Alpha', {
       fontSize: '16px',
+      color: '#A0826D',
+      fontFamily: 'Arial, sans-serif',
+    });
+
+    // Build timestamp
+    const buildDate = new Date(BUILD_INFO.timestamp);
+    const buildTimeStr = buildDate.toLocaleString();
+    this.add.text(20, this.cameras.main.height - 30, `Built: ${buildTimeStr}`, {
+      fontSize: '14px',
       color: '#A0826D',
       fontFamily: 'Arial, sans-serif',
     });
