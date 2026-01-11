@@ -6,7 +6,7 @@ import CreatureManager from '../../creatures/CreatureManager';
 import { CreatureInstance, Stats } from '../../creatures/types';
 
 export class WorldScene extends Phaser.Scene {
-  private hexSize: number = 60;  // Base hex size, will be scaled
+  private hexSize: number = 60;  // Base hex size
   private rooms: Map<string, HexRoom> = new Map();
   private roomGraphics: Map<string, Phaser.GameObjects.Container> = new Map();
 
@@ -14,7 +14,6 @@ export class WorldScene extends Phaser.Scene {
   private creatureSprites: Map<string, Phaser.GameObjects.Container> = new Map();
 
   private worldContainer?: Phaser.GameObjects.Container;
-  private uiElements: Phaser.GameObjects.GameObject[] = [];
 
   // Drag-and-drop state
   private draggedCreature?: { creatureId: string; originalRoom: HexRoom; sprite: Phaser.GameObjects.Container };
@@ -59,11 +58,27 @@ export class WorldScene extends Phaser.Scene {
     // UI
     this.createUI();
 
-    // Position and zoom to fit screen
-    this.resizeWorld();
+    // Position and scale world to fit
+    const width = this.cameras.main.width;
+    const height = this.cameras.main.height;
+    this.worldContainer.setPosition(width / 2, height / 2);
 
-    // Listen for resize events (orientation change)
-    this.scale.on('resize', this.handleResize, this);
+    // Calculate zoom to fit all rooms on screen with less aggressive scaling
+    // Room layout spans roughly:
+    // q: -1 to 2 (4 hexes wide)
+    // r: 0 to 2 (3 hexes tall)
+    const hexWidth = this.hexSize * Math.sqrt(3);
+    const hexHeight = this.hexSize * 2;
+
+    const worldWidth = hexWidth * 4.5;
+    const worldHeight = hexHeight * 3;
+
+    // Calculate scale to fit with more padding (0.75 instead of 0.9)
+    const scaleX = (width * 0.75) / worldWidth;
+    const scaleY = (height * 0.75) / worldHeight;
+    const scale = Math.min(scaleX, scaleY);
+
+    this.worldContainer.setScale(scale);
 
     // Camera controls (pinch zoom, pan - simplified for now)
     this.input.on('wheel', (_pointer: Phaser.Input.Pointer, _gameObjects: Phaser.GameObjects.GameObject[], _deltaX: number, deltaY: number) => {
@@ -78,44 +93,6 @@ export class WorldScene extends Phaser.Scene {
     this.startRoomEffects();
 
     console.log('🏠 World created with hexagonal rooms!');
-  }
-
-  private handleResize(gameSize: Phaser.Structs.Size) {
-    // Update camera
-    this.cameras.main.setSize(gameSize.width, gameSize.height);
-
-    // Reposition and rescale world
-    this.resizeWorld();
-
-    // Recreate UI for new size
-    this.createUI();
-  }
-
-  private resizeWorld() {
-    if (!this.worldContainer) return;
-
-    const width = this.cameras.main.width;
-    const height = this.cameras.main.height;
-
-    // Center the world container
-    this.worldContainer.setPosition(width / 2, height / 2);
-
-    // Calculate zoom to fit all rooms on screen
-    // Room layout spans roughly:
-    // q: -1 to 2 (4 hexes wide)
-    // r: 0 to 2 (3 hexes tall)
-    const hexWidth = this.hexSize * Math.sqrt(3);
-    const hexHeight = this.hexSize * 2;
-
-    const worldWidth = hexWidth * 4;
-    const worldHeight = hexHeight * 2.5;
-
-    // Calculate scale to fit with padding
-    const scaleX = (width * 0.9) / worldWidth;
-    const scaleY = (height * 0.9) / worldHeight;
-    const scale = Math.min(scaleX, scaleY);
-
-    this.worldContainer.setScale(scale);
   }
 
   private createInitialRooms() {
@@ -289,16 +266,12 @@ export class WorldScene extends Phaser.Scene {
       console.log(`Picked up ${creatureId} from ${currentRoom.config.name}`);
     });
 
-    interactiveChild.on('drag', (_pointer: Phaser.Input.Pointer, dragX: number, dragY: number) => {
-      // Move container to follow pointer (in world space)
+    interactiveChild.on('drag', (pointer: Phaser.Input.Pointer) => {
+      // Use pointer's world coordinates, adjusted for worldContainer position
       if (this.worldContainer) {
-        const worldScale = this.worldContainer.scale;
-        const worldX = this.worldContainer.x;
-        const worldY = this.worldContainer.y;
-
-        // Convert screen coordinates to world coordinates
-        const localX = (dragX - worldX) / worldScale;
-        const localY = (dragY - worldY) / worldScale;
+        // Pointer world coords are relative to camera, convert to worldContainer local coords
+        const localX = (pointer.worldX - this.worldContainer.x) / this.worldContainer.scaleX;
+        const localY = (pointer.worldY - this.worldContainer.y) / this.worldContainer.scaleY;
 
         container.setPosition(localX, localY);
       }
@@ -421,10 +394,6 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private createUI() {
-    // Clear old UI elements
-    this.uiElements.forEach(element => element.destroy());
-    this.uiElements = [];
-
     const width = this.cameras.main.width;
     const height = this.cameras.main.height;
 
@@ -444,7 +413,7 @@ export class WorldScene extends Phaser.Scene {
     });
 
     // Title
-    const title = this.add.text(width / 2, 30, 'Creature World', {
+    this.add.text(width / 2, 30, 'Creature World', {
       fontSize: '24px',
       color: '#8B4513',
       fontFamily: 'Arial, sans-serif',
@@ -456,7 +425,7 @@ export class WorldScene extends Phaser.Scene {
     .setDepth(1000);
 
     // Instructions
-    const instructions = this.add.text(width / 2, height - 30,
+    this.add.text(width / 2, height - 30,
       'Tap & drag creatures | Scroll to zoom', {
       fontSize: '14px',
       color: '#8B4513',
@@ -466,9 +435,6 @@ export class WorldScene extends Phaser.Scene {
     }).setOrigin(0.5)
     .setScrollFactor(0)
     .setDepth(1000);
-
-    // Track UI elements
-    this.uiElements.push(backButton, title, instructions);
   }
 
   private startRoomEffects() {
