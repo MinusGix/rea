@@ -3,6 +3,7 @@ import { BootScene } from './scenes/BootScene';
 import { MenuScene } from './scenes/MenuScene';
 import { RaisingScene } from './scenes/RaisingScene';
 import { CollectionScene } from './scenes/CollectionScene';
+import { WorldScene } from './scenes/WorldScene';
 
 export const gameConfig: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -29,7 +30,7 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
       debug: false,
     },
   },
-  scene: [BootScene, MenuScene, RaisingScene, CollectionScene],
+  scene: [BootScene, MenuScene, RaisingScene, CollectionScene, WorldScene],
   render: {
     pixelArt: false,
     antialias: true,

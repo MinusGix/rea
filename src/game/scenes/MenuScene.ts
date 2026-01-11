@@ -69,8 +69,8 @@ export class MenuScene extends Phaser.Scene {
     });
 
     startButtonBg.on('pointerup', () => {
-      console.log('🎮 Starting game...');
-      this.scene.start('RaisingScene');
+      console.log('🏠 Starting world view...');
+      this.scene.start('WorldScene');
     });
 
     // Collection button
