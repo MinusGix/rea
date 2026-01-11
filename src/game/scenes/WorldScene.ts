@@ -6,7 +6,7 @@ import CreatureManager from '../../creatures/CreatureManager';
 import { CreatureInstance, Stats } from '../../creatures/types';
 
 export class WorldScene extends Phaser.Scene {
-  private hexSize: number = 100;
+  private hexSize: number = 70;  // Reduced from 100 to fit more on screen
   private rooms: Map<string, HexRoom> = new Map();
   private roomGraphics: Map<string, Phaser.GameObjects.Container> = new Map();
 
@@ -176,12 +176,12 @@ export class WorldScene extends Phaser.Scene {
 
     if (hasSprite) {
       const sprite = this.add.image(0, 0, definition.id);
-      sprite.setScale(0.1); // Small in world view
+      sprite.setScale(0.06); // Smaller for tighter grid view
       container.add(sprite);
     } else {
       // Fallback circle
-      const circle = this.add.circle(0, 0, 20, definition.color);
-      circle.setStrokeStyle(2, definition.accentColor);
+      const circle = this.add.circle(0, 0, 12, definition.color);
+      circle.setStrokeStyle(1, definition.accentColor);
       container.add(circle);
     }
 
