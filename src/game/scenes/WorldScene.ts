@@ -59,26 +59,10 @@ export class WorldScene extends Phaser.Scene {
     this.createUI();
 
     // Position and scale world to fit
-    const width = this.cameras.main.width;
-    const height = this.cameras.main.height;
-    this.worldContainer.setPosition(width / 2, height / 2);
+    this.resizeWorld();
 
-    // Calculate zoom to fit all rooms on screen with less aggressive scaling
-    // Room layout spans roughly:
-    // q: -1 to 2 (4 hexes wide)
-    // r: 0 to 2 (3 hexes tall)
-    const hexWidth = this.hexSize * Math.sqrt(3);
-    const hexHeight = this.hexSize * 2;
-
-    const worldWidth = hexWidth * 4.5;
-    const worldHeight = hexHeight * 3;
-
-    // Calculate scale to fit with more padding (0.75 instead of 0.9)
-    const scaleX = (width * 0.75) / worldWidth;
-    const scaleY = (height * 0.75) / worldHeight;
-    const scale = Math.min(scaleX, scaleY);
-
-    this.worldContainer.setScale(scale);
+    // Listen for orientation changes
+    this.scale.on('resize', this.handleResize, this);
 
     // Camera controls (pinch zoom, pan - simplified for now)
     this.input.on('wheel', (_pointer: Phaser.Input.Pointer, _gameObjects: Phaser.GameObjects.GameObject[], _deltaX: number, deltaY: number) => {
@@ -93,6 +77,40 @@ export class WorldScene extends Phaser.Scene {
     this.startRoomEffects();
 
     console.log('🏠 World created with hexagonal rooms!');
+  }
+
+  private handleResize(gameSize: Phaser.Structs.Size) {
+    console.log('📱 Orientation change detected:', gameSize.width, 'x', gameSize.height);
+
+    // Recenter and rescale world
+    this.resizeWorld();
+  }
+
+  private resizeWorld() {
+    if (!this.worldContainer) return;
+
+    const width = this.cameras.main.width;
+    const height = this.cameras.main.height;
+
+    // Center the world container
+    this.worldContainer.setPosition(width / 2, height / 2);
+
+    // Calculate zoom to fit all rooms on screen
+    // Room layout spans roughly:
+    // q: -1 to 2 (4 hexes wide)
+    // r: 0 to 2 (3 hexes tall)
+    const hexWidth = this.hexSize * Math.sqrt(3);
+    const hexHeight = this.hexSize * 2;
+
+    const worldWidth = hexWidth * 4.5;
+    const worldHeight = hexHeight * 3;
+
+    // Calculate scale to fit tightly (0.95 = fill 95% of screen)
+    const scaleX = (width * 0.95) / worldWidth;
+    const scaleY = (height * 0.95) / worldHeight;
+    const scale = Math.min(scaleX, scaleY);
+
+    this.worldContainer.setScale(scale);
   }
 
   private createInitialRooms() {

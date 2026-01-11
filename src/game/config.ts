@@ -14,6 +14,8 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
     autoCenter: Phaser.Scale.CENTER_BOTH,
     width: 800,
     height: 1200,
+    // Force resize events on orientation change
+    autoRound: true,
   },
   physics: {
     default: 'arcade',
